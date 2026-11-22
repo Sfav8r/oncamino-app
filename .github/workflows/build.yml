@@ -1,0 +1,97 @@
+name: OnCamino Android test app
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      refresh:
+        description: Fetch the latest app project from the website first
+        type: boolean
+        default: true
+permissions:
+  contents: write
+env:
+  SOURCE_URL: https://theslowluxurylife.com/wp-content/uploads/oncamino-app-src/src-41f22c4bbbbb2924b91bece7.zip
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch the app project from the website
+        if: hashFiles('package.json') == '' || github.event.inputs.refresh == 'true'
+        run: |
+          curl -fsSL "$SOURCE_URL" -o src.zip
+          unzip -oq src.zip && rm src.zip
+          git config user.name "OnCamino build"
+          git config user.email "actions@github.com"
+          git add -A
+          git commit -m "OnCamino app project from theslowluxurylife.com" || echo "No changes"
+          git push
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - run: npm ci
+      - run: npx cap sync android
+      - name: Build the test app
+        working-directory: android
+        run: chmod +x gradlew && ./gradlew assembleDebug --no-daemon
+      - run: cp android/app/build/outputs/apk/debug/app-debug.apk OnCamino-test.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: OnCamino-test
+          path: OnCamino-test.apk
+      - name: Publish the download
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: test-latest
+          name: OnCamino test version (Android)
+          body: |
+            Test version of the OnCamino app for Android phones.
+            On the phone, open this page, tap OnCamino-test.apk, then allow "Install unknown apps" when asked.
+          prerelease: true
+          files: OnCamino-test.apk
+  check-on-emulator:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: OnCamino-test
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules && sudo udevadm trigger --name-match=kvm
+      - name: Open the app on an Android emulator and take screenshots
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          script: |
+            adb install -r OnCamino-test.apk
+            adb shell pm grant app.oncamino android.permission.ACCESS_FINE_LOCATION || true
+            adb shell am start -n app.oncamino/.MainActivity
+            sleep 40
+            adb exec-out screencap -p > screen-1.png
+            sleep 20
+            adb exec-out screencap -p > screen-2.png
+            adb logcat -d | grep -iE "Capacitor|chromium|AndroidRuntime" | tail -300 > app-log.txt || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: OnCamino-emulator-check
+          path: |
+            screen-1.png
+            screen-2.png
+            app-log.txt
+      - name: Add the screenshots to the download page
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: test-latest
+          files: |
+            screen-1.png
+            screen-2.png
+            app-log.txt
