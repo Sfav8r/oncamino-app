@@ -1,0 +1,23 @@
+{
+  "appId": "app.oncamino",
+  "appName": "OnCamino",
+  "webDir": "www",
+  "appendUserAgent": "OnCaminoApp/1.0",
+  "backgroundColor": "#011F40",
+  "server": {
+    "url": "https://theslowluxurylife.com/live-camino-francais-map/?app=1",
+    "errorPath": "index.html",
+    "allowNavigation": ["theslowluxurylife.com", "*.theslowluxurylife.com"]
+  },
+  "android": {
+    "useLegacyBridge": true
+  },
+  "ios": {
+    "contentInset": "never",
+    "limitsNavigationsToAppBoundDomains": true
+  },
+  "plugins": {
+    "SplashScreen": { "launchShowDuration": 1500, "backgroundColor": "#011F40", "showSpinner": false },
+    "StatusBar": { "style": "DARK", "backgroundColor": "#011F40", "overlaysWebView": false }
+  }
+}

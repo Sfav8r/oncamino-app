@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>OnCamino</title>
+<style>
+html,body{margin:0;height:100%;background:#011F40;color:#F4EAD5;font-family:Georgia,serif}
+main{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px;box-sizing:border-box}
+img{width:120px;height:120px;border-radius:26px;margin-bottom:24px}
+h1{font-size:28px;margin:0 0 12px;color:#E6C17A;font-weight:600}
+p{font-size:18px;line-height:1.45;max-width:420px;margin:0 0 28px}
+button{font:inherit;font-size:19px;font-weight:700;background:#C99A4C;color:#011F40;border:0;border-radius:12px;padding:14px 32px}
+</style></head>
+<body><main>
+<img src="icon.svg" alt="">
+<h1>OnCamino</h1>
+<p id="m">OnCamino needs a connection the first time it opens, to load the map and save it for walking offline. Please connect to Wi-Fi or mobile data and try again.</p>
+<button id="b" type="button">Try again</button>
+</main>
+<script>
+var L={es:["OnCamino necesita conexión la primera vez que se abre, para cargar el mapa y guardarlo para caminar sin conexión. Conéctate a wifi o datos móviles y vuelve a intentarlo.","Reintentar"],fr:["OnCamino a besoin d'une connexion à la première ouverture, pour charger la carte et l'enregistrer pour marcher hors ligne. Connectez-vous au wifi ou aux données mobiles et réessayez.","Réessayer"],de:["OnCamino braucht beim ersten Öffnen eine Verbindung, um die Karte zu laden und für unterwegs ohne Netz zu speichern. Bitte mit WLAN oder mobilen Daten verbinden und erneut versuchen.","Erneut versuchen"],it:["OnCamino ha bisogno di una connessione la prima volta, per caricare la mappa e salvarla per camminare offline. Connettiti al wi-fi o ai dati mobili e riprova.","Riprova"],pt:["O OnCamino precisa de ligação na primeira vez que abre, para carregar o mapa e guardá-lo para caminhar sem rede. Ligue-se ao wi-fi ou aos dados móveis e tente de novo.","Tentar de novo"]};
+var lg=(navigator.language||"en").slice(0,2);if(L[lg]){document.getElementById("m").textContent=L[lg][0];document.getElementById("b").textContent=L[lg][1];document.documentElement.lang=lg;}
+var URL="https://theslowluxurylife.com/live-camino-francais-map/?app=1";
+document.getElementById("b").onclick=function(){location.href=URL;};
+window.addEventListener("online",function(){location.href=URL;});
+</script></body></html>
